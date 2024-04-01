@@ -77,7 +77,7 @@ const Navbar = () => {
 
   return (
     <div className={styles.navbar}>
-            <h1>G Share</h1>
+            <h1>File Share</h1>
 
             {
                 auth.isAuth ?

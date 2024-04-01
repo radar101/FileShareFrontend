@@ -44,10 +44,10 @@ const page = () => {
     if (data.ok) {
       toast.success('Login Successful')
       getUserData()
-      // router.push('/myfiles');
+      router.push('/myfiles'); 
     }
     else {
-      toast.error(data.message)
+      toast.error(data.message);
     }
   }
 

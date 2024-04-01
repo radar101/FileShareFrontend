@@ -1,8 +1,14 @@
 .allfiles {
-    background-color: black;
+    /* background-color: black; */
     margin: 20px;
     height: 80vh;
     overflow-y: auto;
+}
+
+.nofile{
+    background-image: url("../app/nofile.svg");
+    width: 100%;
+    height: 100vh;
 }
 
 .allfiles table {

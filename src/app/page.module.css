@@ -1,0 +1,6 @@
+.back{
+    background-image: url("./homewallpaper.svg");
+    /* border: 100px solid black; */
+    height: 100vh;
+    width: 100%;
+}  

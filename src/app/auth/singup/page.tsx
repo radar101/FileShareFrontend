@@ -74,7 +74,7 @@ const page = () => {
     let data = await res.json()
     if (data.ok) {
       toast.success('Signup successful')
-      Router.push('auth/login')
+      Router.push('/auth/login')
     }
 
     else {

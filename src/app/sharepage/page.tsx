@@ -90,42 +90,124 @@ const page = () => {
   const Router = useRouter();
 
 
-  const handleUpload = async ()=>{
-    if (email == "" || filename  == '' || !file) {
-      toast.error('Please fill all the fields')
-      return
-    }
+  // const handleUpload = async ()=>{
+  //   if (email == "" || filename  == '' || !file) {
+  //     toast.error('Please fill all the fields')
+  //     return
+  //   }
 
-    let formdata = new FormData();
-    formdata.append('receiveremail', email);
-    formdata.append('filename', filename);
+  //   let formdata = new FormData();
+  //   formdata.append('receiveremail', email);
+  //   formdata.append('filename', filename);
 
-    if (file){
-      formdata.append('clientfile', file)
-    }
+  //   if (file){
+  //     formdata.append('clientfile', file)
+  //   }
 
-    let res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/file/sharefile' , {
-      method : 'post',
-      body : formdata,
-      credentials: 'include'
+  //   let res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/file/sharefile' , {
+  //     method : 'post',
+  //     body : formdata,
+  //     credentials: 'include'
+  //   })
+
+  //   setUploading(true);
+
+  //   let data = await res.json()
+  //   if (data.ok) {
+  //     toast.success('File Sent Successfully');
+  //     socket.emit('uploaded' , {
+  //       from : auth.user.email,
+  //       to : email,
+  //     });
+  //     Router.push('/myfiles')
+  //   }
+
+  //   else {
+  //     toast.error(data.message)
+  //   }
+
+
+  // }
+
+
+  const generatepostobjecturl = async () => {
+    let res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/file/generatepostobjecturl', {
+      method: 'GET',
+      credentials: 'include',
     })
-
-    setUploading(true);
-
     let data = await res.json()
     if (data.ok) {
-      toast.success('File Sent Successfully');
-      socket.emit('uploaded' , {
-        from : auth.user.email,
-        to : email,
-      });
-      Router.push('/myfiles')
+      console.log(data.data.signedUrl)
+      return data.data
+    }
+    else {
+      toast.error('Failed to generate post object url')
+      return null
+    }
+
+  }
+
+  const uploadtos3byurl = async (url: any) => {
+    const options = {
+      method: 'PUT',
+      body: file,
+    }; 
+
+    let res = await fetch(url, options); // here is a error
+    if (res.ok) { 
+      // toast.success('File uploaded successfully');
+      return true
+    }
+    else {
+      // toast.error('Failed to upload file')
+      return false
+    }
+  }
+
+  const handleUpload = async () => {
+  
+    let s3urlobj = await generatepostobjecturl()
+    if (!s3urlobj) {
+      return;
+    }
+    let filekey = s3urlobj.filekey;
+    let s3url = s3urlobj.signedUrl;
+    let uploaded = await uploadtos3byurl(s3url)
+    if (!uploaded) {
+      console.log("Uploadation failed");
+      return;
+    } 
+    // toast.success('File uploaded successfully')
+
+
+    let res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/file/sharefile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        receiveremail: email,
+        filename: filename,
+        filekey: filekey,
+        fileType: file.type
+      })
+    })
+
+    let data = await res.json()
+
+    if (data.ok) {
+      toast.success('File shared successfully');
+      socket.emit('uploaded', {
+        from: auth.user.email,
+        to: email,
+      })
+      Router.push('/myfiles');
     }
 
     else {
-      toast.error(data.message)
+      toast.error('Failed to share file')
     }
-
 
   }
 
